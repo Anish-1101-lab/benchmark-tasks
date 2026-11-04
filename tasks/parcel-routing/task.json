@@ -1,0 +1,21 @@
+{
+  "title": "Sort parcels into chutes using a routing card",
+  "category": "Impact on jobs",
+  "keywords": [
+    "parcel sorting",
+    "lookup table",
+    "label reading",
+    "logistics",
+    "bimanual",
+    "pick and place"
+  ],
+  "instruction": "sort each parcel into the chute that the routing card lists for its colour",
+  "context": "Mail and parcel sorters (O*NET 43-5053.00) route items by looking up a code on a sort scheme rather than by matching what they see. Here the colour-to-chute mapping is arbitrary (red goes to C), so a robot has to read and apply the card; matching colours or guessing gets parcels missorted.",
+  "setup": "Positions are measured on the table from the midpoint between the two arm bases: forward is away from the arms, left and right as seen from behind the arms. (1) Chutes: three identical grey plastic open bins, fixed, each 10 cm deep and 12 cm wide inside with 4 mm walls 6 cm tall on a 3 mm floor; near inside edges 32 cm forward; centres 15 cm left (A), centred (B) and 15 cm right (C). (2) Chute tags: a white card 5.5 x 6 cm lying flat just in front of each bin (near edge 25.9 cm forward), printed with its letter A, B or C in matte black block capitals 3.5 cm wide and 4.9 cm tall. (3) Routing card: white, 18 cm deep x 14 cm wide, flat and fixed, near edge 5 cm forward, spanning 13 to 27 cm right. Three rows, far to near: a red square then C (row centre 20 cm forward), a blue square then A (14 cm), a green square then B (8 cm); squares 4 x 4 cm centred 16.5 cm right, letters 3 x 4.2 cm centred 23.5 cm right. (4) Parcels: three 5 cm cardboard cubes, 120 g each, wrapped in red, blue and green paper, loose, in a line on the midline with centres 7 (red), 15 (blue) and 23 (green) cm forward. All lettering is upright as seen from behind the arms. Nothing else is on the table.",
+  "scoring": "Scored once, after the episode ends. A parcel is in a chute if its centre is inside that bin's walls, below their tops. 0.0 if any parcel is in a wrong chute (a missort). Otherwise one third for each parcel in its own chute (red in C, blue in A, green in B): 0.33, 0.67 or 1.0. Parcels left on the table, on a tag or card, or on a wall top don't count; doing nothing scores 0, and dropping every parcel into one chute scores 0.",
+  "run_limit": "2,400 steps (2 minutes at 20 Hz)",
+  "reset_notes": "Take the parcels out of the chutes and put them back on their marked spots on the midline. The bins, tags and routing card are fixed (tape or putty).",
+  "fidelity": "Calibrated YAM station replica in Isaac Lab-Arena (Isaac Sim). Bins, tags and the routing card are fixed rigid boxes; their letters are 1 mm raised black strips (printed in the real world). Parcels are rigid 5 cm cubes with the right mass but no give, so they slide and bounce a little differently from real cardboard. Lighting and cameras follow the station calibration.",
+  "scores": "Dream-1 run: 0.33; demo: 1.0",
+  "media": "M-M8WP9J"
+}
