@@ -144,8 +144,9 @@ def distance(objects):
 
 
 def score(objects):
-    """1.0 for exactly the 3 and the 7; 0.5 for only one of them; 0 for an empty basket or any other item in it."""
-    return {"exact": 1.0, "half": 0.5}.get(outcome(objects), 0.0)
+    """1.0 for exactly the 3 and the 7; 0 otherwise. No partial credit: putting in one random item would hit the 3
+    or the 7 half the time, so a half score would reward guessing."""
+    return 1.0 if outcome(objects) == "exact" else 0.0
 
 
 def demo():

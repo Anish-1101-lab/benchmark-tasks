@@ -40,12 +40,13 @@ at the end of the episode. An item is in the basket when its centre is inside th
 | Outcome (`outcome()`) | Basket holds | Score |
 |---|---|---|
 | `exact` | Exactly green (3) and orange (7) | 1.0 |
-| `half` | Only green, or only orange | 0.5 |
+| `half` | Only green, or only orange | 0.0 |
 | `empty` | Nothing | 0.0 |
 | `wrong` | Any other item (yellow 6 or blue 2), with or without the right ones | 0.0 |
 
-Taking everything, the cheapest items, or a random pair all score 0 except by luck on one item (0.5). In the real
-world, scoring is a look into the basket.
+There is no partial credit: one item picked at random would be the 3 or the 7 half the time, so a half score would
+reward guessing. `outcome()` still reports `half` separately, for analysis. Taking everything, the cheapest items or
+a random pair all score 0. In the real world, scoring is a look into the basket.
 
 ## The demo
 
