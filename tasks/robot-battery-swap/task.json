@@ -1,0 +1,20 @@
+{
+  "title": "Swap a mobile robot's depleted battery for the charged one on the charger",
+  "category": "Impact on AI timelines",
+  "keywords": [
+    "robot maintenance",
+    "battery swap",
+    "sequencing",
+    "bimanual hand-off",
+    "insertion"
+  ],
+  "instruction": "swap the robot's depleted battery for the charged one on the charger, and leave the depleted one charging",
+  "context": "Fleets of mobile robots run on swappable battery packs, and today people do the swapping. A robot that can service another robot's battery removes a human step from scaling robot deployments. The charger is occupied, so the robot must plan the order (or hold one pack while moving the other), and seat the new pack in a close-fitting bay.",
+  "setup": "Positions are measured on the table from the midpoint between the two arm bases: forward is away from the arms, left and right as seen from behind the arms. (1) Robot chassis: a yellow block, fixed, 18 cm (forward) x 14 cm, 8 cm tall, centred left to right with its centre 20 cm forward; on top, an open battery bay 13.6 x 6.6 cm and 4 cm deep (floor 4 cm above the table), centred on the chassis, long side forward. (2) Charging plate: dark grey, fixed, 18 x 11 cm, 5 mm thick, centred left to right with its centre 38 cm forward, with a small green light at its back left corner. (3) Battery packs: two identical dark grey blocks, 12 cm (forward) x 5 cm x 10 cm tall, 150 g each, standing upright with the long side forward: the depleted pack in the bay, the charged pack on the centre of the charging plate. Nothing else is on the table.",
+  "scoring": "Scored once, after the episode ends. The charged pack is in the robot if its centre is within 1 cm (horizontally) of the bay's centre, its bottom within 1 cm of the bay floor, and it is still. The depleted pack is charging if its centre is within 2.5 cm of the plate's centre, its bottom within 1 cm of the plate's top, and it is still. 1.0: both. 0.5: only one of the two. 0.0: neither, including doing nothing (the packs start the other way round).",
+  "run_limit": "2,400 steps (2 minutes at 20 Hz)",
+  "reset_notes": "Put the depleted pack back in the bay and the charged pack on the centre of the plate. The packs look identical, so mark their undersides (for scoring only). The chassis and plate are fixed (tape or putty); use dummy packs (wood or 3D-printed), not real batteries.",
+  "fidelity": "Calibrated YAM station replica in Isaac Lab-Arena (Isaac Sim). The chassis and charging plate are fixed rigid boxes; the packs are rigid blocks of the stated size and mass with no connectors, latches or electrical contact (a pack counts as charging by position alone). Lighting and cameras follow the station calibration.",
+  "scores": "Dream-1 run: 0.0; demo: 1.0",
+  "media": "M-2FQB8M"
+}
