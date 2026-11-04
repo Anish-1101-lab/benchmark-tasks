@@ -1,0 +1,21 @@
+{
+  "title": "Kit the two 8 cm spacers for a robot joint by measuring against a ruler",
+  "category": "Impact on AI timelines",
+  "keywords": [
+    "robot assembly",
+    "kitting",
+    "measurement",
+    "ruler",
+    "visual inspection",
+    "bimanual"
+  ],
+  "instruction": "put the two 8 cm spacers in the kit cup",
+  "context": "Building robots means kitting the right parts for each joint, and look-alike parts that differ only in length are a classic source of assembly errors. Five spacers here differ only in length (6 to 12 cm), so the robot has to measure them against the ruler rather than guess.",
+  "setup": "Positions are measured on the table from the midpoint between the two arm bases: forward is away from the arms, left and right as seen from behind the arms. (1) Parts tray: a dark grey block, fixed, 22 cm (forward) x 46 cm, 3 cm tall, centred 17 cm forward and 2 cm left. (2) Spacers: five steel bars with a 2 x 2 cm square section, 30 g each, lying loose on the tray pointing forward, all with their near ends 10 cm forward; from left to right, at 16 cm left, 8 cm left, centred, 8 cm right and 16 cm right, they are 10, 8, 6, 12 and 8 cm long. (3) Ruler: a white strip 15 x 3 cm lying flat on the tray along the forward direction, centred 21.5 cm left, its zero level with the spacers' near ends; a black tick every centimetre (1 cm long) and every 5 cm (2 cm long), up to 14 cm. (4) Kit cup: a blue open box, fixed, 13 x 13 cm inside with 4 mm walls 5 cm tall on a 3 mm floor, centred 38 cm forward and left to right. Nothing else is on the table.",
+  "scoring": "Scored once, after the episode ends. A spacer is in the cup if its centre is inside the cup's walls, below their tops. 1.0: the cup holds exactly the two 8 cm spacers (second from left and rightmost). 0.0 otherwise, including only one of them, any other spacer, or an empty cup. There is no partial credit: a spacer picked at random is 8 cm long two times in five, so a half score would reward guessing; a random pair is right one time in ten.",
+  "run_limit": "2,400 steps (2 minutes at 20 Hz)",
+  "reset_notes": "Lay the spacers back in their places on the tray, near ends against the ruler's zero line. The tray, ruler and cup are fixed (tape or putty).",
+  "fidelity": "Calibrated YAM station replica in Isaac Lab-Arena (Isaac Sim). The tray, ruler and cup are fixed rigid boxes; the ruler's ticks are 1 mm raised black strips (printed in the real world). The spacers are rigid bars of the stated size and mass. Lighting and cameras follow the station calibration.",
+  "scores": "Dream-1 run: 0.0; demo: 1.0",
+  "media": "M-DP2K3P"
+}
