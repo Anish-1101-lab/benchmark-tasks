@@ -1,0 +1,21 @@
+{
+  "title": "Fill a weekly pill organizer for Monday, Wednesday and Friday",
+  "category": "Societal relevance",
+  "keywords": [
+    "medication",
+    "pill organizer",
+    "label reading",
+    "counting",
+    "caregiving",
+    "bimanual"
+  ],
+  "instruction": "put one tablet in each of the monday, wednesday and friday compartments",
+  "context": "Filling weekly pill organizers is a routine chore for older adults and their carers, and a dose in the wrong day or a double dose is a real medication error. The robot must read the day labels, put exactly one tablet in each requested day, and leave the other days empty.",
+  "setup": "Positions are measured on the table from the midpoint between the two arm bases: forward is away from the arms, left and right as seen from behind the arms. (1) Pill organizer: blue plastic, fixed to the table, 35.4 cm wide, 6.8 cm deep, 2.3 cm tall; seven open compartments in a row, each 4.6 cm wide and 6 cm deep inside, walls 4 mm thick and 2 cm tall on a 3 mm floor. Its compartments' near inside edge is 27 cm forward; it is centred left to right, Monday's compartment centre 15 cm left, then every 5 cm to Sunday's 15 cm right. (2) Label strip: white card, 35.4 x 7 cm, flat and fixed against the organizer's front wall, printed with matte black block capitals M T W T F S S (each 4 cm wide, 5.6 cm tall), each centred in front of its compartment, upright as seen from behind the arms. (3) Pill tray: a grey plastic block, 8 cm deep, 20 cm wide, 3 cm tall, fixed, centred 13 cm forward and left to right. (4) Tablets: three white caplets, 22 x 10 x 8 mm, 2 g each, lying flat on the tray with their long side pointing forward, centred 13 cm forward at 6 cm left, centred, and 6 cm right. Nothing else is on the table.",
+  "scoring": "Scored once, after the episode ends, by counting the tablets in each compartment (a tablet counts if its centre is inside a compartment's walls, below their tops). 0.0 if any tablet is in Tuesday, Thursday, Saturday or Sunday (wrong day). Otherwise one third for each of Monday, Wednesday and Friday holding exactly one tablet: 0.33, 0.67 or 1.0. A day holding two or three tablets (a double dose) earns nothing. Tablets left on the tray, the table, the label strip or a wall top don't count; doing nothing scores 0.",
+  "run_limit": "2,400 steps (2 minutes at 20 Hz)",
+  "reset_notes": "Empty every compartment and put the three tablets back on the tray at their marked spots. The organizer, label strip and tray are fixed (tape or putty). Real 22 mm vitamin caplets or 3D-printed replicas both work; replace any that crack.",
+  "fidelity": "Calibrated YAM station replica in Isaac Lab-Arena (Isaac Sim). The organizer, label strip and tray are fixed rigid boxes; the day letters are 1 mm raised black strips on the strip (printed in the real world). The tablets are rigid 22 x 10 x 8 mm boxes, not rounded caplets, so they slide and settle a little differently. Lighting and cameras follow the station calibration.",
+  "scores": "Dream-1 run: 0.0; demo: 1.0",
+  "media": "M-5DLB8V"
+}
