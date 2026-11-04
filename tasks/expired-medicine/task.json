@@ -1,0 +1,21 @@
+{
+  "title": "Put the expired medicines in the return bin, given today's date",
+  "category": "Societal relevance",
+  "keywords": [
+    "medication safety",
+    "expiry dates",
+    "date reasoning",
+    "reading",
+    "household",
+    "pick and place"
+  ],
+  "instruction": "it is november 2026. put every expired medicine box in the return bin",
+  "context": "Expired medicines pile up in home cabinets, and sorting them means reading each expiry date and comparing it with today. The boxes look identical, so the only cue is the printed date: two have expired and one has not, and returning the good one is a mistake.",
+  "setup": "Positions are measured on the table from the midpoint between the two arm bases: forward is away from the arms, left and right as seen from behind the arms. (1) Medicine boxes: three identical white cardboard boxes, 5 x 5 cm and 8 cm tall, 60 g each, standing loose on the midline with centres 10, 20 and 30 cm forward. (2) Expiry cards: a white card, 15.5 cm wide x 4.5 cm deep, lying flat and fixed to the right of each box (centre 11 cm right, level with its box), printed in matte black block characters 2.5 x 3.5 cm with the box's expiry date as MM/YY: 05/26 for the nearest box, 02/27 for the middle box, 09/25 for the farthest, upright as seen from behind the arms. (3) Return bin: a grey plastic open bin, fixed, 16 x 16 cm inside with 4 mm walls 10 cm tall on a 3 mm floor, centred 27 cm forward and 20 cm left. Nothing else is on the table.",
+  "scoring": "Scored once, after the episode ends. A box is in the bin if its centre is inside the bin's walls, below their tops. 0.0 if the in-date box (02/27, the middle one) is in the bin. Otherwise 0.5 for each expired box (05/26 and 09/25) in the bin: 0.5 or 1.0. Doing nothing scores 0, and so does putting all three in the bin.",
+  "run_limit": "2,400 steps (2 minutes at 20 Hz)",
+  "reset_notes": "Take the boxes out of the bin and stand them back on their marked spots, each next to its own card. The cards and the bin are fixed (tape or putty). Empty boxes are fine.",
+  "fidelity": "Calibrated YAM station replica in Isaac Lab-Arena (Isaac Sim). The bin and the expiry cards are fixed rigid boxes; the dates are 1 mm raised black strips on the cards (printed in the real world, where they could also be printed on the boxes). The medicine boxes are rigid blocks of the stated size and mass. Lighting and cameras follow the station calibration.",
+  "scores": "Dream-1 run: 0.0; demo: 1.0",
+  "media": "M-A52MC2"
+}
