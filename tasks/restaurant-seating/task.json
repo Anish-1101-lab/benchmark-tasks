@@ -1,0 +1,21 @@
+{
+  "title": "Seat two parties at the tables with the right number of chairs",
+  "category": "Impact on jobs",
+  "keywords": [
+    "restaurant host",
+    "counting",
+    "scene understanding",
+    "hospitality",
+    "bimanual",
+    "pick and place"
+  ],
+  "instruction": "seat the parties: put the red marker on the table with 4 chairs and the blue marker on the table with 2 chairs",
+  "context": "Restaurant hosts (O*NET 35-9031.00) seat each party at a table that fits it, which means counting the chairs around each table on the floor. Here the four tables have 2, 3, 4 and 5 chairs, so the robot has to count rather than pick the nearest or the biggest table.",
+  "setup": "Positions are measured on the table from the midpoint between the two arm bases: forward is away from the arms, left and right as seen from behind the arms. (1) Tables: four wooden blocks, fixed, each 12 x 12 cm and 3 cm tall, centred 20 cm forward and 40 cm forward, at 13 cm left and 13 cm right. (2) Chairs: grey blocks, fixed, 3 x 3 cm and 4 cm tall, each 1 cm out from a table's edge, centred on that side or 3 cm either side of its middle when a side has two. Far-left table: 2 chairs (far side, left side). Far-right table: 3 chairs (far, left and right sides). Near-left table: 5 chairs (2 on the near side, 2 on the left side, 1 on the right side). Near-right table: 4 chairs (2 on the near side, 1 each on the left and right sides). (3) Markers: a red and a blue 5 cm cube, 50 g each, loose, centred 7 cm forward at 6 cm right (red) and 6 cm left (blue). Nothing else is on the table.",
+  "scoring": "Scored once, after the episode ends. A marker is on a table if its centre is over that table's top and its bottom is within 1 cm of the top, still. 1.0: the red marker is on the near-right table (4 chairs) and the blue marker on the far-left table (2 chairs). 0.0 otherwise. There is no partial credit: a marker put on a random table would be right one time in four, so a half score would reward guessing.",
+  "run_limit": "2,400 steps (2 minutes at 20 Hz)",
+  "reset_notes": "Put the markers back on their marked spots in front of the arms. The tables and chairs are fixed (tape or putty).",
+  "fidelity": "Calibrated YAM station replica in Isaac Lab-Arena (Isaac Sim). Tables and chairs are fixed rigid blocks (a scale model of a dining floor); the markers are rigid cubes of the stated size and mass. Lighting and cameras follow the station calibration.",
+  "scores": "Dream-1 run: 0.0; demo: 1.0",
+  "media": "M-9X3CE3"
+}
