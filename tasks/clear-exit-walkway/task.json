@@ -1,0 +1,20 @@
+{
+  "title": "Clear the boxes off a marked walkway to an emergency exit",
+  "category": "Societal relevance",
+  "keywords": [
+    "fire safety",
+    "egress",
+    "housekeeping",
+    "implicit goals",
+    "bimanual"
+  ],
+  "instruction": "move the boxes off the walkway to the emergency exit",
+  "context": "Blocked exit routes are among the most cited workplace fire-safety violations. A robot tidying a warehouse or office should know that a marked exit walkway has to be clear, without being told which boxes to move or where.",
+  "setup": "Positions are measured on the table from the midpoint between the two arm bases: forward is away from the arms, left and right as seen from behind the arms. (1) Walkway: a green strip 12 cm wide and 42 cm long, flat on the table, fixed, along the midline from 4 to 46 cm forward. (2) Exit sign: a dark green card 4.5 x 12.5 cm with EXIT in white block capitals 3.5 cm tall, flat on the table, fixed, centred 50 cm forward on the midline, readable from behind the arms. (3) Boxes: three closed cardboard boxes, 6 cm cubes, 100 g each, loose: two on the walkway, centred 15 cm and 31 cm forward on the midline, and one beside it, centred 23 cm forward and 20 cm left. Nothing else is on the table.",
+  "scoring": "Scored once, after the episode ends. A box blocks the walkway if its centre is within 10.2 cm of the midline and between the arms' midpoint and 50 cm forward (the walkway plus half a box and 1.2 cm of margin all round). A box is lost if it has fallen off the table. 1.0: no box blocks the walkway and none is lost. 0.5: exactly one box blocks it and none is lost. 0.0: two or more block it, or any box is lost.",
+  "run_limit": "2,400 steps (2 minutes at 20 Hz)",
+  "reset_notes": "Stand the boxes back in their places. The walkway and sign are fixed (tape).",
+  "fidelity": "Calibrated YAM station replica in Isaac Lab-Arena (Isaac Sim). The walkway and sign are flat fixed strips; the boxes are rigid cubes of the stated size and mass. Lighting and cameras follow the station calibration.",
+  "scores": "Dream-1 run: 0.0; demo: 1.0",
+  "media": "M-KNT2NA"
+}
