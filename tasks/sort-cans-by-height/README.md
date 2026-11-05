@@ -48,7 +48,8 @@ marks at random are in order one time in six, and a single can on its right mark
 
 The arms take turns: the left arm puts the 9 cm can on the middle mark and moves aside while the right arm waits at
 its ready pose, then the right arm puts the 12 cm can on the right mark and the 6 cm can on the left mark. Each grip
-pauses 2.5 s above the can and closes 3.5 cm above the table.
+pauses 2.5 s above the can and closes at its mid-height; the right arm aims 1.6 cm left of the left mark to make up
+for the short can's slip in its grip.
 
 ## Runtime and seeds
 
