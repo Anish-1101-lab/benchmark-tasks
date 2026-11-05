@@ -1,0 +1,20 @@
+{
+  "title": "Put half of the six bolts in a cup",
+  "category": "Impact on AI timelines",
+  "keywords": [
+    "counting",
+    "arithmetic",
+    "quantity",
+    "kitting",
+    "bimanual"
+  ],
+  "instruction": "put half of the bolts in the cup",
+  "context": "Counting out parts ('half of these', 'three of those') is routine in assembly and stores work, and counting is a known weak spot of vision-language-action models, which tend to move everything or a single item. The robot has to count the bolts and halve the number.",
+  "setup": "Positions are measured on the table from the midpoint between the two arm bases: forward is away from the arms, left and right as seen from behind the arms. (1) Bolts: six steel bolts, modelled as rods 1.6 cm across and 6 cm long, 95 g each, standing on end, loose, in a row 16 cm forward at 20, 12 and 4 cm left and 4, 12 and 20 cm right. (2) Cup: a blue open box, fixed, 13 x 13 cm inside, with 4 mm walls 5 cm tall on a 3 mm floor, centred 37 cm forward on the midline. Nothing else is on the table.",
+  "scoring": "Scored once, after the episode ends. A bolt is in the cup if its centre is inside the cup's walls, below their tops. 1.0: exactly three bolts are in the cup, any three. 0.0 otherwise: fewer, more, or none.",
+  "run_limit": "2,400 steps (2 minutes at 20 Hz)",
+  "reset_notes": "Stand the bolts back in their row. The cup is fixed (tape or putty).",
+  "fidelity": "Calibrated YAM station replica in Isaac Lab-Arena (Isaac Sim). The cup is a fixed rigid box; the bolts are rigid cylinders of the stated size and mass (no head or thread). Lighting and cameras follow the station calibration.",
+  "scores": "Dream-1 run: 0.0; demo: 1.0",
+  "media": "M-VB2JRR"
+}
