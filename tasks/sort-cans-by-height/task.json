@@ -1,0 +1,20 @@
+{
+  "title": "Line up three cans on shelf marks from shortest to tallest",
+  "category": "Impact on jobs",
+  "keywords": [
+    "shelf stocking",
+    "planogram",
+    "size comparison",
+    "ordering",
+    "bimanual"
+  ],
+  "instruction": "put the cans on the shelf marks from shortest on the left to tallest on the right",
+  "context": "Shelf stocking follows planograms, and many product lines come in one design in several sizes. The robot has to compare heights and order the cans left to right; they look alike from above, so it has to judge height, not colour.",
+  "setup": "Positions are measured on the table from the midpoint between the two arm bases: forward is away from the arms, left and right as seen from behind the arms. (1) Shelf: a brown strip 12 x 36 cm and 2 mm thick, flat on the table, fixed, centred 33 cm forward on the midline. (2) Marks: three white squares 7 x 7 cm and 2 mm thick on the shelf, fixed, 33 cm forward at 11 cm left, on the midline and 11 cm right. (3) Cans: three red steel cans 5 cm across, alike but for height, loose, standing upright in a row 12 cm forward: the 9 cm can (120 g) at 12 cm left, the 12 cm can (160 g) on the midline and the 6 cm can (80 g) at 12 cm right. Nothing else is on the table.",
+  "scoring": "Scored once, after the episode ends. A can is on a mark if it stands upright (within about 25 degrees of vertical), its centre within the mark's edges and no more than 2 cm above where it rests. 1.0: the 6 cm can is on the left mark, the 9 cm can on the middle mark and the 12 cm can on the right mark. 0.0 otherwise. There is no partial credit: three cans set on the marks at random are in order one time in six, and a single can on its right mark one time in three.",
+  "run_limit": "2,400 steps (2 minutes at 20 Hz)",
+  "reset_notes": "Stand the cans back in their row. The shelf and marks are fixed (tape).",
+  "fidelity": "Calibrated YAM station replica in Isaac Lab-Arena (Isaac Sim). The shelf and marks are fixed flat boxes; the cans are rigid cylinders of the stated size and mass (no rims or labels). Lighting and cameras follow the station calibration.",
+  "scores": "Dream-1 run: 0.0; demo: 1.0",
+  "media": "M-CPQJ8F"
+}
