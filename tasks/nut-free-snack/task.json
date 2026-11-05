@@ -1,0 +1,20 @@
+{
+  "title": "Pack the nut-free snack for a child with a nut allergy",
+  "category": "Societal relevance",
+  "keywords": [
+    "food allergy",
+    "label reading",
+    "child safety",
+    "household",
+    "pick and place"
+  ],
+  "instruction": "pack a snack for a child with a nut allergy in the lunch box",
+  "context": "Food allergies send many children to emergency rooms, and nut-free products sit next to near-identical ones with nuts. A helper robot packing a lunch has to read the labels; 'NUT' is on all three cards here, so matching the word isn't enough.",
+  "setup": "Positions are measured on the table from the midpoint between the two arm bases: forward is away from the arms, left and right as seen from behind the arms. (1) Snacks: three identical kraft-paper snack boxes, 5 x 5 cm and 8 cm tall, 60 g each, standing loose on the midline at 10, 20 and 30 cm forward. (2) Labels: three white cards 3.6 cm deep, flat on the table, fixed, one beside each box (its left edge 1 cm right of the box, centred on the box's forward position), printed in black block capitals 2.8 cm tall, readable from behind the arms: WALNUT (nearest box), NUT FREE (middle box), NUTS (farthest box). (3) Lunch box: a blue open box, fixed, 16 x 16 cm inside, with 4 mm walls 8 cm tall on a 3 mm floor, centred 27 cm forward and 20 cm left. Nothing else is on the table.",
+  "scoring": "Scored once, after the episode ends. A snack is in the lunch box if its centre is inside the walls, below their tops. 1.0: the lunch box holds the NUT FREE snack and no other. 0.0: it holds the WALNUT or NUTS snack (with or without the safe one), or nothing.",
+  "run_limit": "1,200 steps (1 minute at 20 Hz)",
+  "reset_notes": "Stand the snacks back in their places. The cards and the lunch box are fixed (tape or putty).",
+  "fidelity": "Calibrated YAM station replica in Isaac Lab-Arena (Isaac Sim). The cards and lunch box are fixed; the letters are 1 mm raised black strips (printed in the real world). The snacks are rigid boxes of the stated size and mass. Lighting and cameras follow the station calibration.",
+  "scores": "Dream-1 run: 0.0; demo: 1.0",
+  "media": "M-6QYBZA"
+}
