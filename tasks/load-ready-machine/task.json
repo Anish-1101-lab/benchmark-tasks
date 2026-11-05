@@ -1,0 +1,20 @@
+{
+  "title": "Load a part onto the machine whose stack light shows it's ready",
+  "category": "Impact on jobs",
+  "keywords": [
+    "machine tending",
+    "stack light",
+    "industrial signals",
+    "factory",
+    "pick and place"
+  ],
+  "instruction": "load the part onto the machine that is ready",
+  "context": "Machine tending is a large share of factory robot work, and stack lights (red: stopped or fault, amber: warning, green: ready or running) are how machines report their state on the shop floor. The robot is told only to load the machine that is ready, so it has to read the lights and know the convention.",
+  "setup": "Positions are measured on the table from the midpoint between the two arm bases: forward is away from the arms, left and right as seen from behind the arms. (1) Machines: three loading fixtures, grey steel plates 10 x 10 cm and 6 mm thick, fixed, centred 33 cm forward at 15 cm left, on the midline and 15 cm right. (2) Stack lights: behind each fixture, 43 cm forward, a steel post 1.6 cm across and 6 cm tall topped by three lamps 4 cm across and 3 cm tall each, red on top, amber in the middle, green at the bottom. One lamp per light is lit (bright) and the other two are off (dark): left machine green, middle machine red, right machine amber. (3) Part: a dark anodised aluminium block, a 4 cm cube, 170 g, loose, 10 cm forward and 8 cm left. Nothing else is on the table.",
+  "scoring": "Scored once, after the episode ends. The part is on a fixture if its centre is within the fixture's edges (5 cm of its centre, forward and sideways) and no more than 2 cm above where it rests on the fixture. 1.0: the part is on the left machine's fixture (green light). 0.0: on the middle (red) or right (amber) fixture, or anywhere else.",
+  "run_limit": "1,200 steps (1 minute at 20 Hz)",
+  "reset_notes": "Put the part back 10 cm forward and 8 cm left. The fixtures and lights are fixed; in the real world the lamps are set by hand (or a lamp test) to the same pattern.",
+  "fidelity": "Calibrated YAM station replica in Isaac Lab-Arena (Isaac Sim). The fixtures, posts and lamps are fixed rigid shapes; a lit lamp is a bright colour and an off lamp a dark one (no emitted light). The part is a rigid cube of the stated size and mass. Lighting and cameras follow the station calibration.",
+  "scores": "Dream-1 run: 0.0; demo: 1.0",
+  "media": "M-MNJPEZ"
+}
