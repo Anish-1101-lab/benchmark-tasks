@@ -1,0 +1,20 @@
+{
+  "title": "Tag the pressure gauge that reads in its red zone",
+  "category": "Impact on jobs",
+  "keywords": [
+    "inspection",
+    "gauge reading",
+    "instrument dials",
+    "maintenance",
+    "pick and place"
+  ],
+  "instruction": "put the red tag in front of the gauge reading in the red zone",
+  "context": "Inspection rounds in plants and utilities come down to reading gauges and flagging the ones out of range. The three gauges here are alike except for where the needle points, so the robot has to read each dial against its red zone.",
+  "setup": "Positions are measured on the table from the midpoint between the two arm bases: forward is away from the arms, left and right as seen from behind the arms. (1) Gauges: three dial gauges facing up, fixed, centred 40 cm forward at 15 cm left, on the midline and 15 cm right. Each has a black rim 9.6 cm across and 6 mm tall, a white dial 8.4 cm across with black ticks every 10 % of the scale, the scale running clockwise, as read from behind the arms, from lower left (0) over the top to lower right (full scale), its last 20 % marked by a red arc, and a black needle 3.4 cm long. The needles read 90 % (left gauge, in the red), 45 % (middle) and 68 % (right). (2) Tag spots: three light grey squares 7 x 7 cm and 3 mm thick, fixed, 27 cm forward in front of each gauge. (3) Tag: a red plastic tag 5 x 3 x 2 cm, 30 g, loose, 10 cm forward and 6 cm left. Nothing else is on the table.",
+  "scoring": "Scored once, after the episode ends. The tag is on a spot if its centre is within the spot's edges and no more than 2 cm above where it rests on the spot. 1.0: the tag is on the spot in front of the left gauge (the one in the red). 0.0: on another spot, or anywhere else.",
+  "run_limit": "1,200 steps (1 minute at 20 Hz)",
+  "reset_notes": "Put the tag back 10 cm forward and 6 cm left. The gauges are fixed; in the real world the needles are set with the gauges' test pressures (or printed dial faces).",
+  "fidelity": "Calibrated YAM station replica in Isaac Lab-Arena (Isaac Sim). The gauges are fixed and flat; ticks, red arc and needles are 1 mm raised strips (no glass cover, needles don't move). The tag is a rigid block of the stated size and mass. Lighting and cameras follow the station calibration.",
+  "scores": "Dream-1 run: 0.0; demo: 1.0",
+  "media": "M-9CGC5V"
+}
