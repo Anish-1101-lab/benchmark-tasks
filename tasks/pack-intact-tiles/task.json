@@ -1,0 +1,20 @@
+{
+  "title": "Pack the intact tiles and leave the broken one",
+  "category": "Impact on jobs",
+  "keywords": [
+    "quality check",
+    "packing",
+    "defect detection",
+    "warehouse",
+    "bimanual"
+  ],
+  "instruction": "pack the undamaged tiles in the box",
+  "context": "Packing by hand includes a quick visual check: a broken part must not ship. The three tiles here are identical except that one is snapped in two, so the robot has to look before it packs.",
+  "setup": "Positions are measured on the table from the midpoint between the two arm bases: forward is away from the arms, left and right as seen from behind the arms. (1) Tray: a dark grey block, fixed, 14 cm (forward) x 40 cm, 3 cm tall, centred 17 cm forward on the midline. (2) Tiles: terracotta quarry tiles 5 x 5 cm and 2 cm thick, loose, lying flat on the tray in a row 17 cm forward: an intact tile (100 g) at 12 cm left, an intact tile (100 g) on the midline, and a tile broken in two along its middle at 12 cm right (two 5 x 2.3 cm halves, 50 g each, 4 mm apart, turned 3 and 2 degrees opposite ways). (3) Packing box: a beige open box, fixed, 13 x 13 cm inside, with 4 mm walls 5 cm tall on a 3 mm floor, centred 37 cm forward on the midline. Nothing else is on the table.",
+  "scoring": "Scored once, after the episode ends. A piece is in the box if its centre is inside the box's walls, below their tops. 1.0: both intact tiles are in the box and neither half of the broken tile is. 0.0 otherwise: either half in the box, one intact tile only, or none. There is no partial credit: a tile picked at random is intact two times in three, so a half score would reward guessing.",
+  "run_limit": "2,400 steps (2 minutes at 20 Hz)",
+  "reset_notes": "Lay the tiles and the two halves back in their places on the tray. The tray and box are fixed (tape or putty).",
+  "fidelity": "Calibrated YAM station replica in Isaac Lab-Arena (Isaac Sim). The tray and box are fixed rigid boxes; the tiles and halves are rigid blocks of the stated size and mass, the halves modelling a clean break. Lighting and cameras follow the station calibration.",
+  "scores": "Dream-1 run: 0.0; demo: 1.0",
+  "media": "M-5SFZZW"
+}
