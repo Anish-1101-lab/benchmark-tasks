@@ -1,0 +1,20 @@
+{
+  "title": "Put the cup on the coaster on the left of a person sitting across the table",
+  "category": "Societal relevance",
+  "keywords": [
+    "perspective taking",
+    "spatial language",
+    "human-robot interaction",
+    "serving",
+    "pick and place"
+  ],
+  "instruction": "i'm sitting across the table from you. put the cup on the coaster on my left",
+  "context": "Robots in homes and restaurants take requests phrased from the speaker's point of view. Here the speaker sits opposite the robot, so 'my left' is the robot's right, a mix-up a robot that reads directions from its own point of view makes every time.",
+  "setup": "Positions are measured on the table from the midpoint between the two arm bases: forward is away from the arms, left and right as seen from behind the arms. (1) Coasters: three identical cork discs, 9 cm across and 4 mm thick, fixed, 30 cm forward at 15 cm left, on the midline, and 15 cm right. (2) Place setting: a white plate 14 cm across and 1.2 cm tall, fixed, 47 cm forward on the midline, where the person sits, at the far side of the table, facing the arms. (3) Cup: a red ceramic cup without a handle, 6 cm across and 8 cm tall, 80 g, standing loose 12 cm forward and 5 cm right. Nothing else is on the table.",
+  "scoring": "Scored once, after the episode ends. The cup is on a coaster if its centre is within the coaster's 4.5 cm radius and it stands upright (within about 25 degrees of vertical). The person faces the arms, so their left is the arms' right. 1.0: the cup stands on the coaster 15 cm right of the midline (the person's left). 0.0 otherwise: on the middle coaster, on the person's right, tipped over, or anywhere else.",
+  "run_limit": "1,200 steps (1 minute at 20 Hz)",
+  "reset_notes": "Stand the cup back 12 cm forward and 5 cm right. The coasters and plate are fixed (tape or putty).",
+  "fidelity": "Calibrated YAM station replica in Isaac Lab-Arena (Isaac Sim). The coasters and plate are fixed rigid discs; the cup is a rigid cylinder of the stated size and mass. The person isn't modelled: the instruction and the place setting say where they sit. Lighting and cameras follow the station calibration.",
+  "scores": "Dream-1 run: 0.0; demo: 1.0",
+  "media": "M-82M888"
+}
