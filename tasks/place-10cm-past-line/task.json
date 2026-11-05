@@ -1,0 +1,20 @@
+{
+  "title": "Set a block down 10 cm beyond a taped line, measuring with a ruler",
+  "category": "Impact on jobs",
+  "keywords": [
+    "measurement",
+    "layout",
+    "ruler",
+    "precise placement",
+    "pick and place"
+  ],
+  "instruction": "put the block down with its centre 10 cm beyond the red line",
+  "context": "Layout work, from setting out fixtures to spacing parts on a bench, means placing things a measured distance from a reference line. A robot that places things 'about there' fails it; here it can use the ruler on the table.",
+  "setup": "Positions are measured on the table from the midpoint between the two arm bases: forward is away from the arms, left and right as seen from behind the arms. (1) Line: red tape 6 mm wide and 50 cm long, flat on the table, fixed, square to the midline, its centre line 12 cm forward. (2) Ruler: a white strip 4.5 cm wide and 22 cm long, flat on the table, fixed, running forward from the tape's centre line, centred 15 cm left; black ticks along its right edge every centimetre (1 cm long) and every 5 cm (2 cm long), with 5, 10, 15 and 20 printed beside the long ticks. (3) Block: a blue wooden block, a 4 cm cube, 40 g, loose, 7 cm forward and 10 cm right. Nothing else is on the table.",
+  "scoring": "Scored once, after the episode ends. The error is how far the block's centre is from 10 cm beyond the tape's centre line, measured square to the tape; its sideways position doesn't matter. The block must rest on the table (its centre no more than 2.8 cm above it; on the ruler counts). 1.0: error 1 cm or less. 0.5: error 2 cm or less. 0.0: a larger error, or not resting on the table.",
+  "run_limit": "1,200 steps (1 minute at 20 Hz)",
+  "reset_notes": "Put the block back 7 cm forward and 10 cm right. The tape and ruler are fixed.",
+  "fidelity": "Calibrated YAM station replica in Isaac Lab-Arena (Isaac Sim). The tape and ruler are fixed flat strips; the ticks and numbers are 1 mm raised black strips (printed in the real world). The block is a rigid cube of the stated size and mass. Lighting and cameras follow the station calibration.",
+  "scores": "Dream-1 run: 0.0; demo: 1.0",
+  "media": "M-HM79W6"
+}
