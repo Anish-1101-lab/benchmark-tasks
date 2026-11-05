@@ -1,0 +1,20 @@
+{
+  "title": "Put a cube on the pad north of a plate, reading north from a compass card",
+  "category": "Impact on AI timelines",
+  "keywords": [
+    "compass directions",
+    "map reading",
+    "spatial reasoning",
+    "symbol grounding",
+    "pick and place"
+  ],
+  "instruction": "put the cube on the pad north of the plate",
+  "context": "Site plans, maps and warehouse floors give directions by compass, and north is rarely 'away from the robot'. A robot that maps north to 'forward' by habit puts things in the wrong place; here it has to read the compass card.",
+  "setup": "Positions are measured on the table from the midpoint between the two arm bases: forward is away from the arms, left and right as seen from behind the arms. (1) Plate: a grey block 8 x 8 cm and 1 cm tall, fixed, centred 28 cm forward on the midline. (2) Pads: four identical white squares 7 x 7 cm and 3 mm thick, fixed, centred 11 cm from the plate's centre on each side: 39 cm forward on the midline, 17 cm forward on the midline, and 28 cm forward at 11 cm left and at 11 cm right. (3) Compass card: a white card 13 x 13 cm, flat on the table, fixed, centred 11 cm forward and 24 cm left, with a black cross 7 cm across, an arrowhead on the arm pointing left, and black letters 1.75 cm tall, upright as read from behind the arms: N beyond the left end, S beyond the right end, E beyond the far end and W beyond the near end. North is therefore to the arms' left. (4) Cube: a red wooden block, a 4 cm cube, 60 g, loose, 8 cm forward on the midline. Nothing else is on the table.",
+  "scoring": "Scored once, after the episode ends. The cube is on a pad if its centre is within the pad's edges and no more than 2 cm above where it rests on the pad. 1.0: the cube is on the pad 11 cm left of the plate (north). 0.0: on any other pad (the far pad is where 'north is forward' would put it), or anywhere else.",
+  "run_limit": "1,200 steps (1 minute at 20 Hz)",
+  "reset_notes": "Put the cube back 8 cm forward on the midline. The plate, pads and card are fixed (tape).",
+  "fidelity": "Calibrated YAM station replica in Isaac Lab-Arena (Isaac Sim). The plate, pads and compass card are fixed; the card's cross, arrowhead and letters are 1 mm raised black strips (printed in the real world). The cube is a rigid block of the stated size and mass. Lighting and cameras follow the station calibration.",
+  "scores": "Dream-1 run: 0.0; demo: 1.0",
+  "media": "M-ZV6VCY"
+}
