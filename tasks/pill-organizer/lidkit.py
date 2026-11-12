@@ -80,6 +80,42 @@ class LidState(ObjectState):
     angles: tuple[float, ...] = ()  # rad, 0 closed, in lid order
 
 
+@dataclass(frozen=True)
+class HeldState(ObjectState):
+    held: bool = False  # a gripper has it between its fingers (see _held)
+
+
+ROBOTS = ("left_robot", "right_robot")
+TCP_IN_GRIPPER = np.array([0.0, 0.0, 0.134])  # yam_arena.constants.TCP_OFFSET: between the pads, 13 mm short of the tips
+FINGER_JOINTS = ("joint7", "joint8")  # each 0 (closed) .. -0.04695 m (open)
+
+
+def _held(environment, centre) -> bool:
+    """A gripper holds a small free object when its fingers are closed onto something (pads 0.5-15 mm apart: not
+    shut on air, not wide open) and the point between its pads is within 15 mm of the object's centre."""
+    scene = environment.unwrapped.scene
+    origin = _np(scene.env_origins)[0]
+    for key in ROBOTS:
+        if key not in scene.articulations.keys():
+            continue
+        art = scene.articulations[key]
+        names = list(art.joint_names)
+        q = _np(art.data.joint_pos)[0]
+        opening = sum(abs(q[names.index(j)]) for j in FINGER_JOINTS if j in names)
+        if not 0.0005 < opening < 0.015:
+            continue
+        bodies = list(art.body_names)
+        g = _np(art.data.body_link_pose_w)[0][bodies.index("gripper")]
+        x, y, z, w = g[3:7]
+        R = np.array([[1 - 2 * (y * y + z * z), 2 * (x * y - w * z), 2 * (x * z + w * y)],
+                      [2 * (x * y + w * z), 1 - 2 * (x * x + z * z), 2 * (y * z - w * x)],
+                      [2 * (x * z - w * y), 2 * (y * z + w * x), 1 - 2 * (x * x + y * y)]])
+        tcp = g[:3] - origin + R @ TCP_IN_GRIPPER
+        if np.linalg.norm(tcp - np.asarray(centre, dtype=float)) < 0.015:
+            return True
+    return False
+
+
 def joint_name(spec: Lidded, i: int) -> str:
     return f"{spec.name}_lid_{i}"
 
@@ -298,6 +334,11 @@ def _patch_scene(scene) -> None:
     def patched_object_states(environment, names):
         plain = [n for n in names if n not in _SPECS]
         out = object_states(environment, plain) if plain else {}
+        rigid = environment.unwrapped.scene.rigid_objects
+        for n in plain:  # free objects also say whether a gripper holds them
+            if n in rigid.keys():
+                st = out[n]
+                out[n] = HeldState(st.pos, st.quat_xyzw, st.lin_vel, st.ang_vel, st.low, st.high, _held(environment, st.pos))
         out.update({n: _state(environment, _SPECS[n]) for n in names if n in _SPECS})
         return {n: out[n] for n in names}
 

@@ -1,7 +1,8 @@
-"""On the station table: a weekly pill organizer (seven compartments in a row, each closed by its own hinged lid,
-labelled M T W T F S S from left to right on a strip in front of it) and three tablets on a tray in front of the arms.
-The user asks for one tablet in each of the Monday, Wednesday and Friday compartments. The robot has to open each of
-those lids, put one tablet in, and close the lid again. The organizer is fixed in place; the tablets are loose.
+"""On the station table: a weekly pill organizer (seven compartments in a row, each closed by its own snap lid with
+its day letter, M T W T F S S, printed on it) and three caplets on a tray in front of the arms. The user asks for one
+tablet in each of the Monday, Wednesday and Friday compartments, with their lids closed. The robot has to pop each of
+those lids open by its tab, drop one caplet in, and press the lid until it snaps shut. Seeded resets move and turn
+the organizer and move each caplet.
 
 Run it:  inspect-robots run --embodiment yam_arena -E task=task.py \\
            --instruction "put one tablet in each of the monday, wednesday and friday compartments and close their lids" \\
@@ -170,10 +171,10 @@ def in_organizer(organizer, point) -> tuple[float, float, float]:
 
 
 def compartment(organizer, state):
-    """The day whose compartment holds this tablet, or None. It must have been let go: its centre inside the walls,
-    within 13 mm of the compartment's floor (lying on it, not held above it), and still."""
+    """The day whose compartment holds this tablet, or None. It must have been let go (no gripper closed on it): its
+    centre inside the walls, within 13 mm of the compartment's floor (lying on it, not held above it), and still."""
     x, y, z = in_organizer(organizer, state.pos)
-    if not (abs(x) < INNER_D / 2 and z < ON_FLOOR - TOP and state.resting()):
+    if getattr(state, "held", False) or not (abs(x) < INNER_D / 2 and z < ON_FLOOR - TOP and state.resting()):
         return None
     for i, name in enumerate(DAY_NAMES):
         if abs(y - day_y(i)) < (PITCH - WALL) / 2:

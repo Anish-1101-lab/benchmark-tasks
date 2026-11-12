@@ -1,9 +1,9 @@
 # Fill a lidded weekly pill organizer for Monday, Wednesday and Friday
 
-A weekly pill organizer with seven compartments, each closed by its own snap lid, is fixed to the table, with the
-day letters M T W T F S S on a strip in front of it; three caplets lie on a tray in front of the arms. The organizer
-and each caplet are shifted by their own random offset every trial. The user asks for one tablet in each of the Monday, Wednesday and Friday
-compartments, with their lids closed. The robot has to pop the right lids open by their small tabs, keep each lid out
+A weekly pill organizer with seven compartments, each closed by its own snap lid with its day letter (M T W T F S S)
+printed on it, is stuck to the table; three caplets lie on a tray in front of the arms. Every trial the organizer is
+moved and turned, and each caplet moved, by its own random amount. The user asks for one tablet in each of the
+Monday, Wednesday and Friday compartments, with their lids closed. The robot has to pop the right lids open by their small tabs, keep each lid out
 of the way while it drops one caplet into the 4.6 cm cell, and press the lid down until it snaps shut again, putting
 nothing in the other days.
 
@@ -19,7 +19,7 @@ from this folder (if your shell's start-up changes directory, pass the full path
 next to it):
 
 ```bash
-# Dream-1: randomized caplet positions; --epochs N runs seeds 0..N-1
+# Dream-1: a randomized start; --epochs N runs seeds 0..N-1
 inspect-robots run --embodiment yam_arena --policy dream \
   -E task=task.py -E object_jitter=0.03 -E control_hz=20 -E cam_width=320 -E cam_height=176 \
   --instruction "put one tablet in each of the monday, wednesday and friday compartments and close their lids" \
@@ -43,8 +43,9 @@ The run prints `task_score` at the end.
 at the end of the episode.
 
 - A tablet is **in** a compartment only once it has been let go and lies on that compartment's floor: its centre
-  inside the walls, less than 13 mm above the floor (a caplet lying flat, on its side or on end), and not moving. A
-  caplet still in the gripper, or resting on a wall top or a lid, is in no compartment.
+  inside the walls, less than 13 mm above the floor (a caplet lying flat, on its side or on end), not moving, and no
+  gripper closed on it (`lidkit.py` flags a free object as held when a gripper's pads are 0.5-15 mm apart within
+  15 mm of it). A caplet still in a gripper, or resting on a wall top or a lid, is in no compartment.
 - A lid is **closed** only when it is snapped shut: open less than 3 degrees, so its front edge is less than 4 mm
   above the wall tops.
 
@@ -61,7 +62,8 @@ look into each compartment.
 What makes this physical rather than a reading exercise: a compartment can't be filled without releasing a snap by
 lifting a 1.6 cm tab with about 1 N, the lid has to be pushed past upright to stay out of the way, the caplet has
 to go into a 4.6 x 6 cm cell past the raised lid, and full credit needs the lid pressed until it snaps shut over the
-tablet. The organizer and the caplets move every trial, so a fixed motion replayed blind doesn't score: RESULT_BLIND
+tablet. The organizer is moved and turned and the caplets are moved every trial, so a fixed motion can't simply be
+replayed.
 
 ## The demo
 
@@ -73,19 +75,23 @@ outer face until it is past upright, and follows its arc down, pressing it until
 Monday and Wednesday and moves aside while the right arm waits at its ready pose; then the right arm does Friday.
 
 The demo is open loop: it uses only the layout given in the setup (nominal caplet spots, `-E object_jitter=0`), no
-simulator state. RESULT_DEMO
+simulator state. In Isaac Lab-Arena it reaches **1.0** and ends on success after about 2,190 steps (110 s).
+Dream-1 scores 0.0: it never lifts a lid.
 
 ## Runtime and seeds
 
 - Run limit: 3,600 steps (3 minutes at 20 Hz). Each of the three lids has to be opened and closed, so this is longer
   than a plain three-object pick-and-place needs.
-- Runtime per trial on an L40S: RESULT_RUNTIME, including Isaac Sim start-up.
+- Runtime per trial on an L40S: about 8.5 minutes for the scripted demo and about 11 minutes for a full 3,600-step
+  Dream-1 run, including Isaac Sim start-up.
 - Seeds: with `-E object_jitter=0.03`, `--epochs N` runs seeds 0..N-1; each seed moves the organizer and each caplet
-  by its own offset of up to 3 cm forward/back and left/right. The label strip and tray never move. (In the sim the
-  organizer is a free 1.5 kg body, standing in for the real one stuck down with putty, so the reset can move it.)
+  by its own offset of up to 3 cm forward/back and left/right; from the organizer's offset, `lidkit.py` also draws a
+  turn of up to 15 degrees for it. The tray never moves. (In the sim the organizer is a free 1.5 kg body, standing in
+  for the real one stuck down with putty, so the reset can move it.) With `-E object_jitter=0` the layout is nominal.
 - Real-world trials: before each trial, roll a six-sided die twice for the organizer and twice per caplet, once for
-  forward/back and once for left/right, and shift it from its marked spot by 1 = -3 cm, 2 = -2 cm, 3 = -1 cm, 4 = +1 cm, 5 = +2 cm,
-  6 = +3 cm.
+  forward/back and once for left/right, and shift it from its marked spot by 1 = -3 cm, 2 = -2 cm, 3 = -1 cm,
+  4 = +1 cm, 5 = +2 cm, 6 = +3 cm; roll once more for the organizer's turn about its centre: 1 = -15, 2 = -9,
+  3 = -3, 4 = +3, 5 = +9, 6 = +15 degrees, counterclockwise seen from above.
 
 ## Third-party assets
 
