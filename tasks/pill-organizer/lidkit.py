@@ -1,8 +1,9 @@
 """lidkit: a fixed base with several lids, each on its own friction hinge, as one object in a yam_arena task file.
 
 Adapted from ``tasks/laptop-under-stack/hingekit.py`` in this repository (one lid on a free base). Changes: any
-number of lids, one revolute joint each; the base is welded to the world, as a pill organizer taped to the table
-is; the state reports every lid's angle.
+number of lids, one revolute joint each; a snap latch on each lid; optionally the base is welded to the world
+(``weld=True``, no ``mass``), otherwise it is a free body of ``mass`` that seeded resets move like any other free
+object; the state reports every lid's angle.
 
 yam_arena task files only hold rigid primitives. Importing this module hooks ``yam_arena.scene`` (and the
 embodiment's reset and step) without modifying yam_arena, so a task file can list a :class:`Lidded` object.
@@ -11,6 +12,10 @@ Each hinge is a constant-torque (Coulomb) friction hinge: it holds its lid at an
 torque above ``hold_torque``. A stiff position drive whose force is capped at ``hold_torque`` holds the lid, and
 after every control step its target is dragged along behind the lid, never more than ``hold_torque / STIFFNESS``
 away (a spring-slider): the lid sticks until pushed with more than ``hold_torque``, then slides against it.
+
+The snap latch: within ``latch_deg`` of closed, a constant ``latch_torque`` pulls the lid shut (a feed-forward joint
+effort, on top of the friction). A latched lid only opens when lifted with more than ``latch_torque +
+hold_torque``, and a lid pressed down into the last ``latch_deg`` snaps shut by itself.
 
 ``success()`` and ``score()`` receive a :class:`LidState` for the object: the base body's pose, velocities and
 world-aligned bounds, and ``angles``, every hinge angle in radians (0 closed, positive open), in lid order.
@@ -47,9 +52,14 @@ class Lidded(Box):
 
     base_boxes: tuple[BoxSpec, ...] = ()
     lids: tuple[LidSpec, ...] = ()
+    weld: bool = False  # weld the base to the world where it spawns (then leave ``mass`` None)
+    base_mass: float = 0.3  # kg, the welded base's mass (a free base uses ``mass``)
     lid_mass: float = 0.005  # kg, each
     hold_torque: float = 0.02  # N m: each hinge's friction torque
     upper_deg: float = 150.0  # each hinge's open stop
+    latch_deg: float = 4.0  # the snap latch acts below this angle
+    latch_torque: float = 0.08  # N m pulling a lid shut inside the latch zone
+    yaw_jitter_deg: float = 0.0  # a free base moved by a seeded reset is also turned by up to this much (see below)
     friction: float = 0.6
 
     def _check(self) -> None:
@@ -57,8 +67,10 @@ class Lidded(Box):
             raise ValueError(f"object name {self.name!r} must be a Python identifier")
         if not (self.base_boxes and self.lids):
             raise ValueError(f"{self.name}: a Lidded object needs base boxes and at least one lid")
-        if not (self.mass and self.mass > 0 and self.lid_mass > 0 and self.hold_torque > 0):
-            raise ValueError(f"{self.name}: masses and hold_torque must be positive")
+        if self.weld != (self.mass is None):
+            raise ValueError(f"{self.name}: a welded base takes base_mass and no mass; a free base needs a mass")
+        if not (self.base_mass > 0 and self.lid_mass > 0 and self.hold_torque > 0 and self.latch_torque >= 0):
+            raise ValueError(f"{self.name}: masses and torques must be positive")
         if not 0 < self.upper_deg <= 180:
             raise ValueError(f"{self.name}: upper_deg must be in (0, 180]")
 
@@ -124,7 +136,7 @@ def _spawn(prim_path: str, cfg, translation=None, orientation=None, **kwargs):
         return prim
 
     base_path = f"{prim_path}/base"
-    base = body(base_path, (0.0, 0.0, 0.0), spec.mass, spec.base_boxes)
+    base = body(base_path, (0.0, 0.0, 0.0), spec.base_mass if spec.weld else spec.mass, spec.base_boxes)
     for i, (hinge, boxes) in enumerate(spec.lids):
         lid_path = f"{prim_path}/lid_{i}"
         body(lid_path, hinge, spec.lid_mass, boxes)
@@ -144,15 +156,15 @@ def _spawn(prim_path: str, cfg, translation=None, orientation=None, **kwargs):
         drive.CreateDampingAttr(DAMPING * math.pi / 180)
         drive.CreateMaxForceAttr(spec.hold_torque)
         drive.CreateTargetPositionAttr(0.0)
-    # Weld the base to the world where it was spawned (the real organizer is taped down).
-    fix = UsdPhysics.FixedJoint.Define(stage, f"{prim_path}/anchor")
-    fix.CreateBody1Rel().SetTargets([Sdf.Path(base_path)])
-    world = UsdGeom.Xformable(base).ComputeLocalToWorldTransform(0)
-    t, q = world.ExtractTranslation(), world.ExtractRotationQuat()
-    fix.CreateLocalPos0Attr(Gf.Vec3f(*t))
-    fix.CreateLocalRot0Attr(Gf.Quatf(q.GetReal(), *q.GetImaginary()))
-    fix.CreateLocalPos1Attr(Gf.Vec3f(0, 0, 0))
-    fix.CreateLocalRot1Attr(Gf.Quatf(1, 0, 0, 0))
+    if spec.weld:  # weld the base to the world where it was spawned
+        fix = UsdPhysics.FixedJoint.Define(stage, f"{prim_path}/anchor")
+        fix.CreateBody1Rel().SetTargets([Sdf.Path(base_path)])
+        world = UsdGeom.Xformable(base).ComputeLocalToWorldTransform(0)
+        t, q = world.ExtractTranslation(), world.ExtractRotationQuat()
+        fix.CreateLocalPos0Attr(Gf.Vec3f(*t))
+        fix.CreateLocalRot0Attr(Gf.Quatf(q.GetReal(), *q.GetImaginary()))
+        fix.CreateLocalPos1Attr(Gf.Vec3f(0, 0, 0))
+        fix.CreateLocalRot1Attr(Gf.Quatf(1, 0, 0, 0))
     UsdPhysics.ArticulationRootAPI.Apply(base)
     art = PhysxSchema.PhysxArticulationAPI.Apply(base)
     art.CreateEnabledSelfCollisionsAttr(False)
@@ -233,14 +245,43 @@ def _set_targets(environment, zero: bool = False) -> None:
             lim = spec.hold_torque / STIFFNESS
             target = q + (target - q).clamp(-lim, lim)
         _TARGET[spec.name] = target
+        latched = q < math.radians(spec.latch_deg)
+        effort = latched.float() * -spec.latch_torque if hasattr(latched, "float") else latched * -spec.latch_torque
         command = getattr(getattr(asset, "actuators", None), "target_command", None)
         if command is not None:  # Isaac Lab 3.0, as yam_arena.actions uses it
             command.set_position_index(value=target)
+            command.set_effort_index(value=effort)
         else:
             asset.set_joint_position_target(target)
+            asset.set_joint_effort_target(effort)
 
 
 # -- hooking yam_arena ----------------------------------------------------------------------------------------
+
+
+def _turn_bases(environment) -> bool:
+    """Turn each free base with ``yaw_jitter_deg`` that a seeded reset has moved off its spawn spot by a yaw drawn
+    from that offset (so it is fixed by the run's seed, like the offset itself), about the base's origin. A base
+    still on its spawn spot (``-E object_jitter=0``) is left square. Returns whether any base was turned."""
+    turned = False
+    scene = environment.unwrapped.scene
+    for spec in _SPECS.values():
+        if spec.weld or spec.yaw_jitter_deg <= 0:
+            continue
+        asset = scene[spec.name]
+        pose = _t(asset.data.root_link_pose_w).clone()
+        offset = _np(pose)[0][:2] - _np(scene.env_origins)[0][:2] - np.asarray(spec.pos[:2])
+        if np.abs(offset).max() < 1e-4:
+            continue
+        seed = int(round(abs(offset[0]) * 1e6)) * 1_000_003 + int(round(abs(offset[1]) * 1e6))
+        yaw = math.radians(np.random.default_rng(seed).uniform(-spec.yaw_jitter_deg, spec.yaw_jitter_deg))
+        pose[:, 3:7] = pose[:, 3:7] * 0
+        pose[:, 5] = math.sin(yaw / 2)  # (x, y, z, w): a turn about the vertical only
+        pose[:, 6] = math.cos(yaw / 2)
+        asset.write_root_pose_to_sim_index(root_pose=pose)
+        asset.write_root_velocity_to_sim_index(root_velocity=_t(asset.data.default_root_vel).clone() * 0)
+        turned = True
+    return turned
 
 
 def _patch_scene(scene) -> None:
@@ -278,6 +319,12 @@ def _patch_embodiment(module) -> None:
         _set_targets(getattr(self, "_env", None), zero=True)  # so every lid settles closed
         obs = reset(self, *a, **k)
         _set_targets(self._env, zero=True)
+        if _turn_bases(self._env):
+            for _ in range(max(1, round(1.0 / self._base.step_dt))):  # settle again, as yam_arena's reset does
+                self._env.step(self._ready)
+            for _ in range(4):
+                self._base.sim.render()
+            obs = self._observation()
         return obs
 
     cls._task_step, cls.reset = patched_task_step, patched_reset

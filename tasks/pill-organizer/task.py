@@ -40,7 +40,6 @@ WIDTH = len(DAYS) * PITCH + WALL
 OUTER_D = INNER_D + 2 * WALL  # 6.8 cm, front of the front wall to back of the back wall
 BLUE = (0.45, 0.62, 0.85)
 LID_BLUE = (0.62, 0.76, 0.93)
-WHITE = (0.95, 0.95, 0.95)
 BLACK = (0.05, 0.05, 0.05)
 
 # Lids: a 2 mm plate over each compartment, hinged along the top of the back wall, with a grip tab sticking out
@@ -48,8 +47,10 @@ BLACK = (0.05, 0.05, 0.05)
 LID_T = 0.002
 LID_W = PITCH - 0.002
 TAB_OUT, TAB_W, TAB_H = 0.025, 0.016, 0.008  # the tab: reach past the front wall (x), width (y), height (z)
-CLOSED_DEG = 10.0  # a lid counts as closed below this angle
+CLOSED_DEG = 3.0  # a lid counts as closed (snapped shut) below this angle: its front edge under 4 mm up
 HOLD_TORQUE = 0.02  # N m: each hinge's friction (a 5 g lid's own weight makes at most 0.002 N m)
+LATCH_DEG, LATCH_TORQUE = 4.0, 0.08  # the snap: below 4 deg a lid is pulled shut with 0.08 N m
+YAW_JITTER_DEG = 15.0  # seeded resets also turn the organizer by up to this much (see lidkit)
 
 BASE_POS = (X0 + INNER_D / 2, 0.0, TOP)  # the base frame's origin: the organizer's centre, on the table
 HINGE_X = OUTER_D / 2  # in the base frame: the back wall's back face ...
@@ -71,27 +72,8 @@ BASE_BOXES = (
         for k in range(len(DAYS) + 1)
     ],
 )
-LID_BOXES = (  # in the lid frame: origin on the hinge, the lid reaching out along -x when closed
-    ((-OUTER_D / 2, 0.0, LID_T / 2), (OUTER_D, LID_W, LID_T), LID_BLUE),
-    ((-OUTER_D - TAB_OUT / 2, 0.0, 0.0), (TAB_OUT, TAB_W, TAB_H), LID_BLUE),
-)
-ORGANIZER = Lidded(
-    "organizer",
-    pos=BASE_POS,
-    size=(OUTER_D, WIDTH, HINGE_Z),
-    mass=0.3,
-    color=BLUE,
-    base_boxes=BASE_BOXES,
-    lids=tuple(((HINGE_X, day_y(i), HINGE_Z), LID_BOXES) for i in range(len(DAYS))),
-    lid_mass=0.005,
-    hold_torque=HOLD_TORQUE,
-    upper_deg=150.0,
-    friction=0.6,
-)
-
-# The day letters, printed on a white strip on the table in front of the organizer: 5 x 7 block letters on 8 mm
-# cells (4 cm wide, 5.6 cm tall, 8 mm strokes), tops away from the arms, each centred on its compartment. The strip
-# starts 3 cm in front of the front wall, so the lid tabs never cover the letters.
+# The day letters are printed on the lids, as on real organizers: 5 x 7 block letters on 8 mm cells (4 cm wide,
+# 5.6 cm tall, 8 mm strokes), raised 1 mm, tops toward the hinge so they read upright from behind the arms.
 CELL = 0.008
 GLYPHS = {
     "M": ("#...#", "##.##", "#.#.#", "#.#.#", "#...#", "#...#", "#...#"),
@@ -100,12 +82,6 @@ GLYPHS = {
     "F": ("#####", "#....", "#....", "####.", "#....", "#....", "#...."),
     "S": (".####", "#....", "#....", ".###.", "....#", "....#", "####."),
 }
-STRIP_D = 0.07  # strip depth (x)
-STRIP_GAP = 0.03  # strip's back edge to the front wall
-STRIP_X = X0 - WALL - STRIP_GAP - STRIP_D / 2  # strip centre
-STRIP = Box("label_strip", pos=(STRIP_X, 0.0, TOP + 0.0015), size=(STRIP_D, WIDTH, 0.003), color=WHITE)
-
-
 def _glyph_rects(rows):
     """A glyph's ink as rectangles (row, col, rows tall, cols wide), stacking identical runs in consecutive rows."""
     runs = []
@@ -129,45 +105,75 @@ def _glyph_rects(rows):
     return merged
 
 
-def label_rects():
-    """Each day letter's ink in world coordinates: (x centre, y centre, x depth, y width), m."""
-    rects = []
-    top_x = STRIP_X + 7 * CELL / 2  # the letters' top edge (+x)
-    for i, ch in enumerate(DAYS):
-        left_y = day_y(i) + 5 * CELL / 2  # the letter's left edge (+y)
-        for r, c, h, w in _glyph_rects(GLYPHS[ch]):
-            rects.append((top_x - (r + h / 2) * CELL, left_y - (c + w / 2) * CELL, h * CELL, w * CELL))
-    return rects
+def letter_boxes(ch: str):
+    """A day letter's ink as boxes in the lid frame, centred on the closed lid's plate."""
+    top_x = -OUTER_D / 2 + 7 * CELL / 2  # the letter's top edge (toward the hinge, +x)
+    left_y = 5 * CELL / 2  # the letter's left edge (+y)
+    return tuple(
+        ((top_x - (r + h / 2) * CELL, left_y - (c + w / 2) * CELL, LID_T + 0.0005), (h * CELL, w * CELL, 0.001), BLACK)
+        for r, c, h, w in _glyph_rects(GLYPHS[ch])
+    )
 
 
-INK = [
-    Box(f"label_ink_{k}", pos=(x, y, TOP + 0.0035), size=(dx, dy, 0.001), color=BLACK)
-    for k, (x, y, dx, dy) in enumerate(label_rects())
-]
+LID_PLATE = (  # in the lid frame: origin on the hinge, the lid reaching out along -x when closed
+    ((-OUTER_D / 2, 0.0, LID_T / 2), (OUTER_D, LID_W, LID_T), LID_BLUE),
+    ((-OUTER_D - TAB_OUT / 2, 0.0, 0.0), (TAB_OUT, TAB_W, TAB_H), LID_BLUE),
+)
+ORGANIZER = Lidded(
+    "organizer",
+    pos=BASE_POS,
+    size=(OUTER_D, WIDTH, HINGE_Z),
+    color=BLUE,
+    mass=1.5,  # a free body standing in for the real organizer stuck down with putty; seeded resets move it
+    base_boxes=BASE_BOXES,
+    lids=tuple(((HINGE_X, day_y(i), HINGE_Z), LID_PLATE + letter_boxes(ch)) for i, ch in enumerate(DAYS)),
+    lid_mass=0.005,
+    hold_torque=HOLD_TORQUE,
+    upper_deg=150.0,
+    latch_deg=LATCH_DEG,
+    latch_torque=LATCH_TORQUE,
+    yaw_jitter_deg=YAW_JITTER_DEG,
+    friction=0.6,
+)
 
 # -- the tablets ------------------------------------------------------------------------------------------------
 # Three identical white caplets, 22 x 10 x 8 mm and 2 g, lying flat on a pill tray, long side pointing forward.
 # The tray is a fixed grey block, 3 cm tall, so a gripper can close on a caplet without its fingertips meeting the
-# table.
+# table. Seeded resets (-E object_jitter=0.03) move each caplet up to 3 cm each way; their nominal spots are 8 cm
+# apart, so they never overlap, and the tray is big enough that they stay on it.
 TRAY_H = 0.03
-TRAY = Box("pill_tray", pos=(0.13, 0.0, TOP + TRAY_H / 2), size=(0.08, 0.20, TRAY_H), color=(0.55, 0.57, 0.6))
+TRAY = Box("pill_tray", pos=(0.13, 0.0, TOP + TRAY_H / 2), size=(0.10, 0.26, TRAY_H), color=(0.55, 0.57, 0.6))
 TABLET_SIZE = (0.022, 0.010, 0.008)
-TABLET_XY = ((0.13, 0.06), (0.13, 0.0), (0.13, -0.06))
+TABLET_XY = ((0.13, 0.08), (0.13, 0.0), (0.13, -0.08))
 TABLETS = [
     Box(f"tablet_{k}", pos=(x, y, TOP + TRAY_H + TABLET_SIZE[2] / 2), size=TABLET_SIZE, color=(0.96, 0.96, 0.92),
         mass=0.002)
     for k, (x, y) in enumerate(TABLET_XY)
 ]
 
-OBJECTS = [ORGANIZER, STRIP, *INK, TRAY, *TABLETS]
+OBJECTS = [ORGANIZER, TRAY, *TABLETS]
 
 # -- scoring ----------------------------------------------------------------------------------------------------
 
 
-def compartment(state):
-    """The day whose compartment holds this tablet (its centre inside the walls, below their tops), or None."""
-    x, y, z = (float(v) for v in state.pos)
-    if not (X0 < x < X0 + INNER_D and z < FLOOR + WALL_H):
+ON_FLOOR = FLOOR + 0.013  # a caplet resting on a compartment's floor (flat, on its side or on end) has its centre below this
+
+
+def in_organizer(organizer, point) -> tuple[float, float, float]:
+    """A world point in the organizer's base frame (origin at its centre on the table; it may have been moved and
+    turned about the vertical)."""
+    x, y, z, w = (float(v) for v in organizer.quat_xyzw)
+    yaw = math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z))
+    dx, dy, dz = (float(p) - float(o) for p, o in zip(point, organizer.pos))
+    c, s = math.cos(yaw), math.sin(yaw)
+    return (c * dx + s * dy, -s * dx + c * dy, dz)
+
+
+def compartment(organizer, state):
+    """The day whose compartment holds this tablet, or None. It must have been let go: its centre inside the walls,
+    within 13 mm of the compartment's floor (lying on it, not held above it), and still."""
+    x, y, z = in_organizer(organizer, state.pos)
+    if not (abs(x) < INNER_D / 2 and z < ON_FLOOR - TOP and state.resting()):
         return None
     for i, name in enumerate(DAY_NAMES):
         if abs(y - day_y(i)) < (PITCH - WALL) / 2:
@@ -179,14 +185,14 @@ def counts(objects) -> dict[str, int]:
     """Tablets per compartment."""
     out = {name: 0 for name in DAY_NAMES}
     for k in range(len(TABLETS)):
-        day = compartment(objects[f"tablet_{k}"])
+        day = compartment(objects["organizer"], objects[f"tablet_{k}"])
         if day:
             out[day] += 1
     return out
 
 
 def lid_closed(objects, day: str) -> bool:
-    """The day's lid is down: its hinge is open less than CLOSED_DEG."""
+    """The day's lid is snapped shut: its hinge is open less than CLOSED_DEG."""
     return math.degrees(objects["organizer"].angles[DAY_NAMES.index(day)]) < CLOSED_DEG
 
 
@@ -216,8 +222,8 @@ def score(objects):
 
 
 def success(objects):
-    """Exactly one tablet in each of Monday, Wednesday and Friday, their lids closed, none elsewhere, all still."""
-    return score(objects) == 1.0 and all(objects[f"tablet_{k}"].resting() for k in range(len(TABLETS)))
+    """Exactly one tablet lying in each of Monday, Wednesday and Friday, their lids snapped shut, none elsewhere."""
+    return score(objects) == 1.0
 
 
 def distance(objects):
@@ -285,7 +291,7 @@ def _fill(tablet: int, day: str) -> list[Waypoint]:
     w += [Waypoint(0.25, lid_point(PRESS_LOCAL, d, y), FINGER_CLOSED, f"lid down to {d} deg", PUSH_YAW)
           for d in range(65, -1, -5)]
     w += [
-        Waypoint(0.5, lid_point(PRESS_LOCAL, -2, y), FINGER_CLOSED, "press it shut", PUSH_YAW),
+        Waypoint(0.5, lid_point(PRESS_LOCAL, -2, y), FINGER_CLOSED, "press it until it snaps shut", PUSH_YAW),
         Waypoint(1.0, (X0, y, TRAVEL), FINGER_OPEN, "up", 0.0),
     ]
     return w
