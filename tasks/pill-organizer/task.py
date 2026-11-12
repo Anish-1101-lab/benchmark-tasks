@@ -1,15 +1,25 @@
-"""On the station table: a weekly pill organizer (seven open compartments in a row, labelled M T W T F S S from
-left to right on a strip along its front edge) and three tablets lying on the table in front of the arms. The user
-asks for one tablet in each of the Monday, Wednesday and Friday compartments. The organizer is fixed in place;
-the tablets are loose.
+"""On the station table: a weekly pill organizer (seven compartments in a row, each closed by its own hinged lid,
+labelled M T W T F S S from left to right on a strip in front of it) and three tablets on a tray in front of the arms.
+The user asks for one tablet in each of the Monday, Wednesday and Friday compartments. The robot has to open each of
+those lids, put one tablet in, and close the lid again. The organizer is fixed in place; the tablets are loose.
 
 Run it:  inspect-robots run --embodiment yam_arena -E task=task.py \\
-           --instruction "put one tablet in each of the monday, wednesday and friday compartments" \\
+           --instruction "put one tablet in each of the monday, wednesday and friday compartments and close their lids" \\
            --scorer task_score ...
 """
 
-from yam_arena.demo import FINGER_OPEN, Waypoint, pick_place_waypoints
-from yam_arena.task_file import TABLE_TOP, Box
+from __future__ import annotations
+
+import math
+import pathlib
+import sys
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+
+from lidkit import Lidded  # noqa: E402
+from yam_arena.constants import FINGER_CLOSED, FINGER_OPEN  # noqa: E402
+from yam_arena.demo import Waypoint, pick_place_waypoints  # noqa: E402
+from yam_arena.task_file import TABLE_TOP, Box  # noqa: E402
 
 SCENE = "station"
 TOP = TABLE_TOP[SCENE]
@@ -27,9 +37,24 @@ BASE_T = 0.003  # floor plate thickness
 X0 = 0.27  # the compartments' near inside edge (m forward)
 FLOOR = TOP + BASE_T
 WIDTH = len(DAYS) * PITCH + WALL
+OUTER_D = INNER_D + 2 * WALL  # 6.8 cm, front of the front wall to back of the back wall
 BLUE = (0.45, 0.62, 0.85)
+LID_BLUE = (0.62, 0.76, 0.93)
 WHITE = (0.95, 0.95, 0.95)
 BLACK = (0.05, 0.05, 0.05)
+
+# Lids: a 2 mm plate over each compartment, hinged along the top of the back wall, with a grip tab sticking out
+# 2.5 cm past the front wall. Lids are 4.8 cm wide (2 mm gaps between neighbours).
+LID_T = 0.002
+LID_W = PITCH - 0.002
+TAB_OUT, TAB_W, TAB_H = 0.025, 0.016, 0.008  # the tab: reach past the front wall (x), width (y), height (z)
+CLOSED_DEG = 10.0  # a lid counts as closed below this angle
+HOLD_TORQUE = 0.02  # N m: each hinge's friction (a 5 g lid's own weight makes at most 0.002 N m)
+
+BASE_POS = (X0 + INNER_D / 2, 0.0, TOP)  # the base frame's origin: the organizer's centre, on the table
+HINGE_X = OUTER_D / 2  # in the base frame: the back wall's back face ...
+HINGE_Z = BASE_T + WALL_H  # ... at the walls' top
+HX, HZ = BASE_POS[0] + HINGE_X, TOP + HINGE_Z  # the hinge line in the world
 
 
 def day_y(i: int) -> float:
@@ -37,19 +62,36 @@ def day_y(i: int) -> float:
     return (3 - i) * PITCH
 
 
-ORGANIZER = [
-    Box("org_floor", pos=(X0 + INNER_D / 2, 0.0, TOP + BASE_T / 2), size=(INNER_D + 2 * WALL, WIDTH, BASE_T), color=BLUE),
-    Box("org_front", pos=(X0 - WALL / 2, 0.0, FLOOR + WALL_H / 2), size=(WALL, WIDTH, WALL_H), color=BLUE),
-    Box("org_back", pos=(X0 + INNER_D + WALL / 2, 0.0, FLOOR + WALL_H / 2), size=(WALL, WIDTH, WALL_H), color=BLUE),
+BASE_BOXES = (
+    ((0.0, 0.0, BASE_T / 2), (OUTER_D, WIDTH, BASE_T), BLUE),
+    ((-INNER_D / 2 - WALL / 2, 0.0, BASE_T + WALL_H / 2), (WALL, WIDTH, WALL_H), BLUE),
+    ((INNER_D / 2 + WALL / 2, 0.0, BASE_T + WALL_H / 2), (WALL, WIDTH, WALL_H), BLUE),
     *[
-        Box(f"org_div_{k}", pos=(X0 + INNER_D / 2, day_y(0) + PITCH / 2 - k * PITCH, FLOOR + WALL_H / 2),
-            size=(INNER_D, WALL, WALL_H), color=BLUE)
+        ((0.0, day_y(0) + PITCH / 2 - k * PITCH, BASE_T + WALL_H / 2), (INNER_D, WALL, WALL_H), BLUE)
         for k in range(len(DAYS) + 1)
     ],
-]
+)
+LID_BOXES = (  # in the lid frame: origin on the hinge, the lid reaching out along -x when closed
+    ((-OUTER_D / 2, 0.0, LID_T / 2), (OUTER_D, LID_W, LID_T), LID_BLUE),
+    ((-OUTER_D - TAB_OUT / 2, 0.0, 0.0), (TAB_OUT, TAB_W, TAB_H), LID_BLUE),
+)
+ORGANIZER = Lidded(
+    "organizer",
+    pos=BASE_POS,
+    size=(OUTER_D, WIDTH, HINGE_Z),
+    mass=0.3,
+    color=BLUE,
+    base_boxes=BASE_BOXES,
+    lids=tuple(((HINGE_X, day_y(i), HINGE_Z), LID_BOXES) for i in range(len(DAYS))),
+    lid_mass=0.005,
+    hold_torque=HOLD_TORQUE,
+    upper_deg=150.0,
+    friction=0.6,
+)
 
-# The day letters, printed on a white strip along the organizer's front edge: 5 x 7 block letters on 8 mm cells
-# (4 cm wide, 5.6 cm tall, 8 mm strokes), tops away from the arms, each centred on its compartment.
+# The day letters, printed on a white strip on the table in front of the organizer: 5 x 7 block letters on 8 mm
+# cells (4 cm wide, 5.6 cm tall, 8 mm strokes), tops away from the arms, each centred on its compartment. The strip
+# starts 3 cm in front of the front wall, so the lid tabs never cover the letters.
 CELL = 0.008
 GLYPHS = {
     "M": ("#...#", "##.##", "#.#.#", "#.#.#", "#...#", "#...#", "#...#"),
@@ -59,7 +101,8 @@ GLYPHS = {
     "S": (".####", "#....", "#....", ".###.", "....#", "....#", "####."),
 }
 STRIP_D = 0.07  # strip depth (x)
-STRIP_X = X0 - WALL - STRIP_D / 2  # strip centre, just in front of the front wall
+STRIP_GAP = 0.03  # strip's back edge to the front wall
+STRIP_X = X0 - WALL - STRIP_GAP - STRIP_D / 2  # strip centre
 STRIP = Box("label_strip", pos=(STRIP_X, 0.0, TOP + 0.0015), size=(STRIP_D, WIDTH, 0.003), color=WHITE)
 
 
@@ -116,7 +159,7 @@ TABLETS = [
     for k, (x, y) in enumerate(TABLET_XY)
 ]
 
-OBJECTS = [*ORGANIZER, STRIP, *INK, TRAY, *TABLETS]
+OBJECTS = [ORGANIZER, STRIP, *INK, TRAY, *TABLETS]
 
 # -- scoring ----------------------------------------------------------------------------------------------------
 
@@ -142,51 +185,121 @@ def counts(objects) -> dict[str, int]:
     return out
 
 
-def outcome(objects) -> str:
-    """'wrong_day' if any tablet is in a compartment other than Mon/Wed/Fri; otherwise 'n_of_3' days correct."""
+def lid_closed(objects, day: str) -> bool:
+    """The day's lid is down: its hinge is open less than CLOSED_DEG."""
+    return math.degrees(objects["organizer"].angles[DAY_NAMES.index(day)]) < CLOSED_DEG
+
+
+def tally(objects) -> tuple[int, int] | None:
+    """None if any tablet is in a day that wasn't asked for. Otherwise (closed, open): how many of Monday,
+    Wednesday and Friday hold exactly one tablet with their lid closed, and with their lid left open."""
     c = counts(objects)
     if any(n for day, n in c.items() if day not in TARGETS):
-        return "wrong_day"
-    return f"{sum(c[d] == 1 for d in TARGETS)}_of_3"
+        return None
+    good = [d for d in TARGETS if c[d] == 1]
+    closed = sum(lid_closed(objects, d) for d in good)
+    return closed, len(good) - closed
 
 
-def success(objects):
-    """Exactly one tablet in each of Monday, Wednesday and Friday, none elsewhere, all still."""
-    return outcome(objects) == "3_of_3" and all(objects[f"tablet_{k}"].resting() for k in range(len(TABLETS)))
-
-
-def distance(objects):
-    """Target days still missing their single tablet (0 to 3)."""
-    c = counts(objects)
-    return float(sum(c[d] != 1 for d in TARGETS))
+def outcome(objects) -> str:
+    """'wrong_day', or '<closed>_closed_<open>_open' for the requested days holding exactly one tablet."""
+    t = tally(objects)
+    return "wrong_day" if t is None else f"{t[0]}_closed_{t[1]}_open"
 
 
 def score(objects):
-    """0 if any tablet is in a wrong day's compartment. Otherwise one third for each of Monday, Wednesday and
-    Friday holding exactly one tablet (a double dose earns nothing for that day)."""
-    o = outcome(objects)
-    return 0.0 if o == "wrong_day" else {"0_of_3": 0.0, "1_of_3": 0.33, "2_of_3": 0.67, "3_of_3": 1.0}[o]
+    """0 if any tablet is in a day that wasn't asked for. Otherwise, for each of Monday, Wednesday and Friday that
+    holds exactly one tablet: 1/3 if its lid is closed, 1/6 if it was left open. A double dose earns nothing for
+    that day. Rounded to two decimals."""
+    t = tally(objects)
+    return 0.0 if t is None else round(t[0] / 3 + t[1] / 6, 2)
+
+
+def success(objects):
+    """Exactly one tablet in each of Monday, Wednesday and Friday, their lids closed, none elsewhere, all still."""
+    return score(objects) == 1.0 and all(objects[f"tablet_{k}"].resting() for k in range(len(TABLETS)))
+
+
+def distance(objects):
+    """Per requested day: 1 while it lacks its single tablet, 0.5 while it has it but the lid is open."""
+    c = counts(objects)
+    return float(sum(1.0 if c[d] != 1 else (0.0 if lid_closed(objects, d) else 0.5) for d in TARGETS))
+
+
+# -- scripted demo (yam_scripted plays it open loop; run with -E object_jitter=0) --------------------------------
+TRAVEL = TOP + 0.12
+TIP_BELOW_TCP = 0.0128  # the closed fingertips' lowest point below the TCP
+PINCH_LOCAL = (-OUTER_D - TAB_OUT + 0.010, 0.0, 0.0)  # 1 cm in from the tab's tip: pads 1.5 cm clear of the wall
+LIFT_TO_DEG = 50
+PUSH_YAW = math.pi / 2  # closed fingers, housing's narrow side across y
+PUSH_Z = HZ + 0.045  # the straight push that swings a half-open lid past upright
+CLOSE_BACK, CLOSE_Z = 0.09, 0.03  # where the closing push starts: behind the hinge, above the hinge line
+PRESS_LOCAL = (-0.05, 0.0, LID_T + TIP_BELOW_TCP - 0.003)  # closed tips 3 mm into the lid's top, 5 cm from the hinge
+
+
+def lid_point(local, deg: float, y: float) -> tuple[float, float, float]:
+    """A point given in a lid's frame, in the world, with that lid (centred at ``y``) open ``deg`` degrees."""
+    c, s = math.cos(math.radians(deg)), math.sin(math.radians(deg))
+    x, _, z = local
+    return (float(HX + c * x + s * z), float(y), float(HZ - s * x + c * z))
+
+
+def _fill(tablet: int, day: str) -> list[Waypoint]:
+    """Open the day's lid, put the tablet in, close the lid. One arm."""
+    y = day_y(DAY_NAMES.index(day))
+    w: list[Waypoint] = []
+    # 1. Pinch the tab and lift the lid to 50 deg along the hinge's arc; let go.
+    px, py, pz = lid_point(PINCH_LOCAL, 0, y)
+    w += [
+        Waypoint(1.5, (px, py, TRAVEL), FINGER_OPEN, f"over {day}'s tab"),
+        Waypoint(1.5, (px, py, pz), FINGER_OPEN, "fingers either side of the tab"),
+        Waypoint(0.8, (px, py, pz), FINGER_CLOSED, "pinch the tab"),
+    ]
+    w += [Waypoint(0.4, lid_point(PINCH_LOCAL, d, y), FINGER_CLOSED, f"lift the lid to {d} deg")
+          for d in range(5, LIFT_TO_DEG + 1, 5)]
+    ex, ey, ez = lid_point(PINCH_LOCAL, LIFT_TO_DEG, y)
+    w += [
+        Waypoint(0.3, (ex, ey, ez), FINGER_CLOSED, "hold"),
+        Waypoint(0.6, (ex, ey, ez), FINGER_OPEN, "let go of the tab"),
+        Waypoint(0.8, (HX - 0.10, ey, ez), FINGER_OPEN, "back off, in front of the tab"),
+        # 2. Closed fingers under the raised lid's edge, then straight back over the hinge: the lid swings past
+        #    upright and its friction hinge holds it open, leaning back.
+        Waypoint(0.8, (HX - 0.10, y, PUSH_Z), FINGER_CLOSED, "under the lid's edge", PUSH_YAW),
+        Waypoint(3.0, (HX + 0.015, y, PUSH_Z), FINGER_CLOSED, "push the lid open past upright", PUSH_YAW),
+        Waypoint(0.5, (HX + 0.015, y, PUSH_Z), FINGER_CLOSED, "hold", PUSH_YAW),
+        Waypoint(1.0, (HX - 0.06, y, TRAVEL), FINGER_OPEN, "up and away", 0.0),
+    ]
+    # 3. The tablet from the tray into the compartment, let go 1.5 cm above the walls.
+    place = (X0 + INNER_D / 2, y, FLOOR + WALL_H + 0.015)
+    grip_z = TOP + TRAY_H + TABLET_SIZE[2] / 2
+    plan = pick_place_waypoints((*TABLET_XY[tablet], grip_z), place, travel_z=TRAVEL)
+    hover = plan[0]  # settle above the caplet before descending, as the station's own demo does
+    w += [hover, Waypoint(2.5, hover.pos, FINGER_OPEN, "wait", hover.yaw), *plan[1:]]
+    # 4. Closed fingers come down well behind the open lid's tab (it leans back as far as 140 deg), push forward low
+    #    against its outer face until it is past upright, then follow its arc down and press it shut.
+    w += [
+        Waypoint(1.5, (HX + CLOSE_BACK, y, TRAVEL), FINGER_CLOSED, "behind the open lid", PUSH_YAW),
+        Waypoint(1.0, (HX + CLOSE_BACK, y, HZ + CLOSE_Z), FINGER_CLOSED, "down behind it", PUSH_YAW),
+        Waypoint(2.0, (HX - 0.01, y, HZ + CLOSE_Z), FINGER_CLOSED, "push it forward past upright", PUSH_YAW),
+    ]
+    w += [Waypoint(0.25, lid_point(PRESS_LOCAL, d, y), FINGER_CLOSED, f"lid down to {d} deg", PUSH_YAW)
+          for d in range(65, -1, -5)]
+    w += [
+        Waypoint(0.5, lid_point(PRESS_LOCAL, -2, y), FINGER_CLOSED, "press it shut", PUSH_YAW),
+        Waypoint(1.0, (X0, y, TRAVEL), FINGER_OPEN, "up", 0.0),
+    ]
+    return w
 
 
 def demo():
-    """The arms take turns, so they never reach into the middle together: the left arm puts tablet 0 in Monday and
-    tablet 1 in Wednesday and moves aside; meanwhile the right arm waits at its ready pose, then puts tablet 2 in
-    Friday. Each grip pauses 2.5 s above the caplet, closes across its 10 mm width at its centre, and lets go
-    1.5 cm above the walls."""
-    travel_z = TOP + 0.12
-    grip_z = TOP + TRAY_H + TABLET_SIZE[2] / 2
-    drop_z = FLOOR + WALL_H + 0.015
-
-    def into(tablet: int, day: str):
-        place = (X0 + INNER_D / 2, day_y(DAY_NAMES.index(day)), drop_z)
-        plan = pick_place_waypoints((*TABLET_XY[tablet], grip_z), place, travel_z=travel_z)
-        hover = plan[0]  # settle above the caplet before descending, as the station's own demo does
-        return [hover, Waypoint(2.5, hover.pos, FINGER_OPEN, "wait", hover.yaw), *plan[1:]]
-
-    left = into(0, "monday") + into(1, "wednesday")
-    left.append(Waypoint(1.5, (0.18, 0.25, travel_z), FINGER_OPEN, "out of the way", 0.0))
+    """The arms take turns, so they never reach into the middle together: the left arm fills Monday (tablet 0) and
+    Wednesday (tablet 1) and moves aside, while the right arm waits at its ready pose; then the right arm fills
+    Friday (tablet 2). Filling a day: pinch the lid's tab and lift it to 50 deg, push it open past upright with
+    closed fingers, put the tablet in, push the lid back over from behind and press it shut."""
+    left = _fill(0, "monday") + _fill(1, "wednesday")
+    left.append(Waypoint(1.5, (0.18, 0.25, TRAVEL), FINGER_OPEN, "out of the way", 0.0))
     left_time = sum(w.duration for w in left)
     right_ready = (0.318, -0.298, TOP + 0.257)  # the right arm's ready pose (its TCP)
-    right = [Waypoint(left_time, right_ready, FINGER_OPEN, "wait for the left arm", 0.0), *into(2, "friday")]
-    right.append(Waypoint(1.5, (0.18, -0.25, travel_z), FINGER_OPEN, "out of the way", 0.0))
+    right = [Waypoint(left_time, right_ready, FINGER_OPEN, "wait for the left arm", 0.0), *_fill(2, "friday")]
+    right.append(Waypoint(1.5, (0.18, -0.25, TRAVEL), FINGER_OPEN, "out of the way", 0.0))
     return {"left": left, "right": right}
