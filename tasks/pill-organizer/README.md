@@ -75,7 +75,7 @@ outer face until it is past upright, and follows its arc down, pressing it until
 Monday and Wednesday and moves aside while the right arm waits at its ready pose; then the right arm does Friday.
 
 The demo is open loop: it uses only the layout given in the setup (nominal caplet spots, `-E object_jitter=0`), no
-simulator state. In Isaac Lab-Arena it reaches **1.0** and ends on success after about 2,190 steps (110 s).
+simulator state. In Isaac Lab-Arena it reaches **1.0** and ends on success after 2,199 steps (110 s).
 Dream-1 scores 0.0: it never lifts a lid.
 
 ## Runtime and seeds

@@ -17,5 +17,6 @@
   "run_limit": "3,600 steps (3 minutes at 20 Hz)",
   "reset_notes": "Empty every compartment and snap all seven lids shut. Re-stick the organizer at a fresh random offset and turn and put the three caplets on the tray at their marked nominal spots, each shifted by a fresh random offset (up to 3 cm forward/back and left/right; the README gives a die-roll table). The tray stays fixed. Real 22 mm vitamin caplets or 3D-printed replicas both work; replace any that crack.",
   "fidelity": "Calibrated YAM station replica in Isaac Lab-Arena (Isaac Sim). The organizer is a 1.5 kg rigid base standing in for one stuck down with putty; its seven rigid lids have friction hinges plus a snap modelled as a 0.08 N m closing torque within 4 degrees of shut. Day letters are 1 mm raised strips on the lids. Caplets are rigid 22 x 10 x 8 mm boxes with square edges, so they settle a little differently from rounded ones.",
-  "scores": "TODO"
+  "scores": "Dream-1 run: 0.0; demo: 1.0",
+  "media": "M-7T78H6"
 }
